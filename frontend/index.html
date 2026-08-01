@@ -1,0 +1,457 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Agentica Sound — Suno AI Local Music Workstation</title>
+  <link rel="stylesheet" href="static/css/app.css?v=3" />
+</head>
+<body>
+  <div class="shell">
+    <!-- ------------------------------------------------------- Left Sidebar -->
+    <aside class="sidebar">
+      <div class="brand">
+        <span class="brand-glyph">AS</span> Agentica<span>Sound</span>
+      </div>
+      <div class="tagline">Suno AI Local Hardware Studio</div>
+
+      <nav class="nav" id="nav">
+        <button class="nav-btn active" data-view="studio">
+          <svg class="icon-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+          <span>Studio (Create)</span>
+        </button>
+        <button class="nav-btn" data-view="library">
+          <svg class="icon-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+          <span>Library</span>
+        </button>
+        <button class="nav-btn" data-view="lyrics">
+          <svg class="icon-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+          <span>Lyrics Lab</span>
+        </button>
+        <button class="nav-btn" data-view="hardware">
+          <svg class="icon-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line></svg>
+          <span>Hardware & GPU</span>
+        </button>
+        <button class="nav-btn" data-view="models">
+          <svg class="icon-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          <span>Model Manager</span>
+        </button>
+        <button class="nav-btn" data-view="settings">
+          <svg class="icon-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+          <span>Audio Settings</span>
+        </button>
+      </nav>
+
+      <div class="spacer"></div>
+
+      <!-- Live GPU status preview card -->
+      <div class="sidebar-hw">
+        <div class="hw-title">
+          <span>Local Hardware</span>
+          <span class="dot dot-run"></span>
+        </div>
+        <div class="hw-name" id="sidebar-gpu-name">NVIDIA GTX 1650</div>
+        <div class="hw-bar">
+          <div class="hw-bar-fill" id="sidebar-vram-fill"></div>
+        </div>
+      </div>
+
+      <!-- User ID representation at lower left (as requested) -->
+      <div class="account">
+        <div class="avatar" id="holder-avatar">AL</div>
+        <div class="who">
+          <div class="name" id="holder-name">ashish_local</div>
+          <div class="role" id="holder-role">GTX 1650 &bull; Studio Master</div>
+        </div>
+        <button class="link-btn" id="btn-logout" title="Sign out of local studio">Sign out</button>
+      </div>
+    </aside>
+
+    <!-- ------------------------------------------------------ Center Main -->
+    <main class="main">
+      <div class="head">
+        <div class="head-left">
+          <h1 id="view-title">Create Music Studio</h1>
+          <span class="badge-status">
+            <span class="dot dot-run"></span> CUDA &bull; GTX 1650 ONLINE
+          </span>
+        </div>
+        <div class="clock" id="clock">00:00:00</div>
+      </div>
+
+      <!-- Top Metric Cards -->
+      <div class="cards">
+        <div class="card">
+          <div class="k">Tracks Generated</div>
+          <div class="v" id="card-total">0</div>
+        </div>
+        <div class="card">
+          <div class="k">GPU Hardware</div>
+          <div class="v" id="card-gpu">GTX 1650</div>
+        </div>
+        <div class="card">
+          <div class="k">VRAM Allocation</div>
+          <div class="v small" id="card-vram">Calculating...</div>
+        </div>
+        <div class="card">
+          <div class="k">Active Audio Engine</div>
+          <div class="v small" id="card-engine">Neural-Synth + PyTorch</div>
+        </div>
+      </div>
+
+      <!-- VIEW: Studio (Create) -->
+      <section class="view active" id="view-studio">
+        <div class="create-panel">
+          <div class="mode-switch">
+            <button class="mode-btn active" id="mode-simple" type="button">Simple Mode</button>
+            <button class="mode-btn" id="mode-custom" type="button">Custom Lyrics Mode</button>
+          </div>
+
+          <!-- Title Input -->
+          <div class="field" style="margin-bottom:12px;">
+            <label for="title-input">Song Title (Optional)</label>
+            <input type="text" id="title-input" placeholder="e.g. Neon Horizon, Rainy Tokyo, Cybernetic Heartbeat..." />
+          </div>
+
+          <!-- Prompt description -->
+          <div class="field">
+            <label for="prompt-input">Song Description & Prompt</label>
+            <textarea class="prompt-area" id="prompt-input" rows="3" placeholder="Describe the mood, style, genre, instruments and vibe (e.g. 80s retro synthwave with punchy drums, driving arpeggiated bass and soaring analog leads)...">80s retro synthwave with analog synthesizer arpeggio, neon city night drive, punchy drums and melodic lead</textarea>
+          </div>
+
+          <!-- Genre Quick Pills -->
+          <label style="font-size:11.5px; font-weight:500; color:var(--muted);">Style & Genre Presets</label>
+          <div class="genre-pills">
+            <button class="pill active" data-genre="Synthwave" type="button">Synthwave</button>
+            <button class="pill" data-genre="Lo-Fi" type="button">Lo-Fi Chillhop</button>
+            <button class="pill" data-genre="Cyberpunk" type="button">Cyberpunk</button>
+            <button class="pill" data-genre="Cinematic Epic" type="button">Cinematic Epic</button>
+            <button class="pill" data-genre="Deep House" type="button">Deep House</button>
+            <button class="pill" data-genre="Rock" type="button">Rock / Metal</button>
+            <button class="pill" data-genre="Acoustic Pop" type="button">Acoustic Pop</button>
+            <button class="pill" data-genre="Ambient Dream" type="button">Ambient Dream</button>
+          </div>
+
+          <!-- Custom Lyrics Section -->
+          <div id="custom-lyrics-section" style="display:none; margin-top:14px;">
+            <div class="lyrics-bar">
+              <label style="font-size:12px; font-weight:600;">Lyrics & Structure</label>
+              <div style="display:flex; gap:8px;">
+                <div class="tag-helpers">
+                  <button class="btn-tag" data-tag="[Verse]" type="button">[Verse]</button>
+                  <button class="btn-tag" data-tag="[Chorus]" type="button">[Chorus]</button>
+                  <button class="btn-tag" data-tag="[Bridge]" type="button">[Bridge]</button>
+                  <button class="btn-tag" data-tag="[Guitar Solo]" type="button">[Solo]</button>
+                  <button class="btn-tag" data-tag="[Outro]" type="button">[Outro]</button>
+                </div>
+                <button class="btn-ai-lyrics" id="btn-ai-lyrics" type="button">Auto-Write Lyrics</button>
+              </div>
+            </div>
+            <textarea class="lyrics-area" id="lyrics-input" rows="6" placeholder="Enter custom lyrics with structure tags like [Verse 1], [Chorus], [Outro] or click 'Auto-Write Lyrics' above..."></textarea>
+          </div>
+
+          <!-- Audio & Hardware Parameters -->
+          <div class="gen-params">
+            <div class="param-box">
+              <label for="param-dur">Duration</label>
+              <select id="param-dur">
+                <option value="15">15 Seconds (Preview)</option>
+                <option value="30" selected>30 Seconds (Standard)</option>
+                <option value="60">60 Seconds (Full Track)</option>
+                <option value="90">90 Seconds (Extended)</option>
+                <option value="120">120 Seconds (2 Minutes)</option>
+                <option value="custom">Custom Duration...</option>
+              </select>
+              <div id="custom-dur-wrap" style="display:none; margin-top:5px;">
+                <input type="number" id="param-custom-dur" min="5" max="360" value="45" placeholder="Enter seconds (5-360)" style="padding:6px 9px; font-size:12px; width:100%; border:1px solid var(--border-strong); border-radius:6px; background:#fff;" />
+              </div>
+            </div>
+            <div class="param-box">
+              <label for="param-bpm">Tempo (BPM)</label>
+              <input type="number" id="param-bpm" value="124" min="50" max="200" />
+            </div>
+            <div class="param-box">
+              <label for="param-key">Musical Key</label>
+              <select id="param-key">
+                <option value="A Minor" selected>A Minor</option>
+                <option value="C Major">C Major</option>
+                <option value="D Minor">D Minor</option>
+                <option value="F Major">F Major</option>
+                <option value="G Major">G Major</option>
+                <option value="E Minor">E Minor</option>
+              </select>
+            </div>
+            <div class="param-box">
+              <label for="param-engine">Hardware Engine</label>
+              <select id="param-engine">
+                <option value="Local Neural-Synth" selected>Local High-Fi Neural Synth (44.1kHz)</option>
+                <option value="MusicGen-Small">PyTorch MusicGen (Meta)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Bottom create triggers -->
+          <div class="create-footer">
+            <div style="display:flex; gap:18px;">
+              <label class="checkbox-label">
+                <input type="checkbox" id="chk-variations" checked />
+                <span>Generate 2 Variations (Suno Mode)</span>
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" id="chk-instrumental" />
+                <span>Instrumental (Pure Music)</span>
+              </label>
+            </div>
+
+            <button class="btn-create" id="btn-create" type="button">Create Music</button>
+          </div>
+
+          <!-- Generation Progress Indicator -->
+          <div class="gen-progress" id="gen-progress">
+            <div style="display:flex; justify-content:space-between; font-size:12px; font-weight:600; color:var(--accent);">
+              <span id="gen-status-text">Synthesizing audio on local hardware...</span>
+              <span class="dot dot-run"></span>
+            </div>
+            <div class="bar">
+              <div class="bar-fill"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: Library -->
+      <section class="view" id="view-library">
+        <div style="background:#fff; border:1px solid var(--border); border-radius:8px; padding:16px;">
+          <table style="width:100%; border-collapse:collapse;">
+            <thead>
+              <tr style="border-bottom:1px solid var(--border); text-align:left; font-size:11px; color:var(--dim);">
+                <th style="padding:8px 4px;">#</th>
+                <th style="padding:8px 4px;">Title</th>
+                <th style="padding:8px 4px;">Genre</th>
+                <th style="padding:8px 4px;">BPM</th>
+                <th style="padding:8px 4px;">Key</th>
+                <th style="padding:8px 4px;">Duration</th>
+                <th style="padding:8px 4px;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="library-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- VIEW: Lyrics Lab -->
+      <section class="view" id="view-lyrics">
+        <div style="background:#fff; border:1px solid var(--border); border-radius:8px; padding:20px;">
+          <h2 style="font-size:15px; margin:0 0 10px;">AI Lyrics Studio</h2>
+          <p style="color:var(--muted); font-size:12.5px; margin-bottom:16px;">
+            The built-in lyricist generates song sections with rhyming cadence, verse/chorus patterns, and emotional mood tailored to your style.
+          </p>
+          <div class="field">
+            <label>Lyric Prompt / Theme</label>
+            <input type="text" id="lyrics-theme-input" placeholder="e.g. Midnight neon highway drive into the sunrise..." />
+          </div>
+          <button class="btn-primary" style="width:auto; padding:8px 18px;" type="button" onclick="document.getElementById('btn-ai-lyrics').click(); alert('Lyrics generated and sent to the creation studio!');">
+            Generate Lyrics for Studio
+          </button>
+        </div>
+      </section>
+
+      <!-- VIEW: Hardware & GPU -->
+      <section class="view" id="view-hardware">
+        <div style="background:#fff; border:1px solid var(--border); border-radius:8px; padding:20px;">
+          <h2 style="font-size:15px; margin:0 0 10px;">Local Hardware Diagnostics</h2>
+          <p style="color:var(--muted); font-size:12.5px; margin-bottom:16px;">
+            Real-time NVIDIA GPU, CUDA driver, and system memory telemetry.
+          </p>
+          <div id="hw-full-gpu" style="font-family:var(--mono); font-size:12.5px; line-height:1.8; background:var(--surface2); padding:16px; border-radius:6px;">
+            Loading hardware diagnostics...
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: Model Manager -->
+      <section class="view" id="view-models">
+        <div style="background:#fff; border:1px solid var(--border); border-radius:8px; padding:20px;">
+          <h2 style="font-size:15px; margin:0 0 8px;">Model Management & Offline Storage</h2>
+          <p style="color:var(--muted); font-size:12.5px; margin-bottom:18px;">
+            Manage local weights, offline model caches, precision, and GPU offloading for your NVIDIA GTX 1650.
+          </p>
+          
+          <div class="model-cards" style="display:flex; flex-direction:column; gap:14px;">
+            <div style="border:1px solid var(--border); border-radius:8px; padding:16px; background:var(--surface);">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <div>
+                  <strong>Meta MusicGen Small (facebook/musicgen-small)</strong>
+                  <div style="font-size:11.5px; color:var(--muted);">300M parameters &bull; ~1.2 GB Weights &bull; FP16 Recommended for 4GB VRAM</div>
+                </div>
+                <span class="badge" style="background:var(--accent-soft); color:var(--accent); font-weight:600; padding:3px 8px; border-radius:4px;" id="badge-model-status">Ready</span>
+              </div>
+              <p style="font-size:12px; color:var(--text-dim); margin:0 0 12px;">
+                Generates 32kHz audio autoregressively predicting EnCodec tokens. Runs within GTX 1650 4GB memory envelope in half-precision.
+              </p>
+              <div style="display:flex; gap:10px; align-items:center;">
+                <button class="btn-primary" style="width:auto; padding:6px 14px; font-size:12px;" id="btn-download-model" type="button">Download / Verify Weights</button>
+                <span style="font-size:11.5px; color:var(--dim);" id="model-status-text">Cached locally in storage/models</span>
+              </div>
+            </div>
+
+            <div style="border:1px solid var(--border); border-radius:8px; padding:16px; background:var(--surface);">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <div>
+                  <strong>Agentica High-Fi Neural Synthesizer (Built-in)</strong>
+                  <div style="font-size:11.5px; color:var(--muted);">Zero Download &bull; Instant DSP &bull; 44.1kHz Studio Stereo &bull; 0MB VRAM Overhead</div>
+                </div>
+                <span class="badge" style="background:#e8f5e9; color:#2e7d32; font-weight:600; padding:3px 8px; border-radius:4px;">Active &bull; Instant</span>
+              </div>
+              <p style="font-size:12px; color:var(--text-dim); margin:0 0 12px;">
+                Algorithmic neural sound engine with drum machine, arpeggiated bass, chord voicing, and melodic leads. Zero latency generation on any hardware.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: Audio Settings -->
+      <section class="view" id="view-settings">
+        <div style="background:#fff; border:1px solid var(--border); border-radius:8px; padding:20px;">
+          <h2 style="font-size:15px; margin:0 0 10px;">Studio Audio Settings</h2>
+          <div class="field" style="max-width:320px;">
+            <label>Output Sample Rate</label>
+            <select>
+              <option selected>44.1 kHz (CD / Studio Quality)</option>
+              <option>32.0 kHz (MusicGen Native)</option>
+              <option>48.0 kHz (Cinema High-Res)</option>
+            </select>
+          </div>
+          <div class="field" style="max-width:320px;">
+            <label>Audio Bit Depth</label>
+            <select>
+              <option selected>16-bit PCM Linear WAV</option>
+              <option>24-bit PCM High Dynamics</option>
+            </select>
+          </div>
+          <div class="field" style="max-width:320px;">
+            <label>Storage Path</label>
+            <input type="text" value="C:\git_boom\agentica-music\storage\tracks" readonly />
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- --------------------------------- Right Panel: What You Have Generated & Play Options -->
+    <aside class="right-panel">
+      <div class="right-head">
+        <h2>Generated Tracks</h2>
+        <span class="track-count" id="right-track-count">0 Tracks</span>
+      </div>
+
+      <div class="right-content">
+        <!-- Spotlight / Currently Playing Track -->
+        <div class="spotlight-card">
+          <div class="spotlight-top">
+            <div class="spotlight-art">AS</div>
+            <div class="spotlight-meta">
+              <div class="spotlight-title" id="spotlight-title">Select a Track</div>
+              <div class="spotlight-tags">
+                <span id="spotlight-tags">Synthwave &bull; 124 BPM</span>
+                <span class="badge-var" id="spotlight-var">V1</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Interactive Waveform Canvas -->
+          <div class="waveform-box" id="waveform-box" title="Click anywhere on the waveform to seek audio">
+            <canvas class="waveform-canvas" id="waveform-canvas"></canvas>
+            <div class="waveform-progress" id="waveform-progress"></div>
+          </div>
+
+          <!-- Player Controls -->
+          <div class="player-controls">
+            <span class="time-display" id="time-curr">00:00</span>
+            <div class="ctrl-buttons">
+              <button class="btn-round" id="btn-restart" title="Restart track">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+              </button>
+              <button class="btn-round play-main" id="btn-spotlight-play" title="Play / Pause">
+                <svg class="play-icon-svg" width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+              </button>
+              <button class="btn-round" id="btn-loop" title="Toggle loop">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/></svg>
+              </button>
+            </div>
+            <span class="time-display" id="time-total">00:30</span>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="spotlight-actions">
+            <a class="btn-action" id="btn-dl-wav" href="#" download="track.wav">Download WAV</a>
+            <button class="btn-action" id="btn-copy-prompt" type="button">Copy Prompt</button>
+            <button class="btn-action" id="btn-view-lyrics" type="button">Lyrics</button>
+          </div>
+        </div>
+
+        <!-- Generated Tracks History Playlist -->
+        <div class="tracks-header">Library Playlist</div>
+        <div class="track-list" id="track-list">
+          <div style="color:var(--dim); font-size:12px; padding:10px; text-align:center;">Loading generated tracks...</div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- --------------------------------------- Persistent Floating Audio Dock -->
+  <footer class="audio-dock" id="audio-dock" style="display:none;">
+    <div class="dock-left">
+      <div class="dock-art">AS</div>
+      <div class="dock-meta">
+        <div class="dock-title" id="dock-title">Track Title</div>
+        <div class="dock-artist" id="dock-tags">Synthwave &bull; 124 BPM</div>
+      </div>
+    </div>
+
+    <div class="dock-center">
+      <div class="dock-ctrls">
+        <button class="btn-round play-main" style="width:34px; height:34px;" id="dock-play">
+          <svg class="dock-play-svg" width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        </button>
+      </div>
+      <div class="dock-seek-row">
+        <span class="dock-time" id="dock-time-curr">00:00</span>
+        <input type="range" class="dock-slider" id="dock-slider" value="0" min="0" max="100" />
+        <span class="dock-time" id="dock-time-total">00:30</span>
+      </div>
+    </div>
+
+    <div class="dock-right">
+      <div class="volume-row">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" style="color:var(--muted);"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+        <input type="range" class="volume-slider" id="volume-slider" value="85" min="0" max="100" />
+      </div>
+      <a class="btn-action" id="dock-dl" href="#" download style="padding:4px 8px; font-size:11px;">WAV</a>
+    </div>
+  </footer>
+
+  <!-- Lyrics Modal -->
+  <div class="modal-overlay" id="modal-lyrics">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3>Song Lyrics & Structure</h3>
+        <button class="link-btn" id="modal-close" style="font-size:16px;">✕</button>
+      </div>
+      <div class="modal-body" id="modal-lyrics-text"></div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="static/js/config.js?v=3"></script>
+  <script src="static/js/api.js?v=3"></script>
+  <script src="static/js/player.js?v=3"></script>
+  <script src="static/js/app.js?v=3"></script>
+  <script>
+    // Authentication guard
+    if (!getToken()) {
+      window.location.href = "login.html";
+    }
+  </script>
+</body>
+</html>

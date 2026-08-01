@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sign in — Agentica Sound (Suno Local AI)</title>
+  <link rel="stylesheet" href="static/css/app.css?v=1" />
+</head>
+<body>
+  <div class="login-wrap">
+    <!-- brand panel -->
+    <aside class="login-brand">
+      <div class="mark">
+        <span class="glyph">AS</span>
+        Agentica Sound
+      </div>
+
+      <div class="pitch">
+        <h2>Studio-grade AI music, composed and rendered on your local hardware.</h2>
+        <p>
+          The local workstation alternative to Suno AI. Generate full multi-track stereo compositions,
+          intelligent lyrics, stem arrangements, and audio variations powered directly by your NVIDIA GPU and CPU.
+          Zero cloud dependencies, zero subscription limits.
+        </p>
+        <div class="badges">
+          <span class="badge">NVIDIA GTX 1650</span>
+          <span class="badge">CUDA 12.8</span>
+          <span class="badge">44.1kHz Stereo</span>
+          <span class="badge">Dual Variations</span>
+        </div>
+      </div>
+
+      <div class="foot">
+        <span>Copyright &copy; 2026 Agentica Sound Studio</span>
+        <span>Local Hardware Active &bull; Offline Ready</span>
+      </div>
+    </aside>
+
+    <!-- form panel -->
+    <main class="login-panel">
+      <form class="login-card" id="login-form" autocomplete="on">
+        <h1>Welcome Back</h1>
+        <p class="sub">Enter your user ID or username to enter your music studio.</p>
+
+        <div class="field">
+          <label for="username">User ID or Username</label>
+          <div class="control">
+            <input id="username" name="username" type="text" autocomplete="username" value="ashish_local" required />
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="password">Password</label>
+          <div class="control">
+            <input id="password" name="password" type="password" autocomplete="current-password"
+                   class="has-toggle" value="sound2026" required />
+            <button class="toggle" type="button" id="toggle-password" aria-label="Show password">Show</button>
+          </div>
+        </div>
+
+        <div class="login-row">
+          <label>
+            <input type="checkbox" id="remember" checked />
+            Remember me
+          </label>
+          <span class="hint">Local studio profile</span>
+        </div>
+
+        <button class="btn-primary" id="submit" type="submit">Enter Music Studio</button>
+        <div class="error" id="error"></div>
+      </form>
+    </main>
+  </div>
+
+  <script src="static/js/config.js?v=1"></script>
+  <script src="static/js/api.js?v=1"></script>
+  <script>
+    // Already signed in? Skip to studio
+    if (getToken()) {
+      window.location.href = "index.html";
+    }
+
+    const form = document.getElementById("login-form");
+    const submit = document.getElementById("submit");
+    const errorBox = document.getElementById("error");
+    const password = document.getElementById("password");
+    const toggle = document.getElementById("toggle-password");
+
+    toggle.addEventListener("click", () => {
+      const showing = password.type === "text";
+      password.type = showing ? "password" : "text";
+      toggle.textContent = showing ? "Show" : "Hide";
+      toggle.setAttribute("aria-label", showing ? "Show password" : "Hide password");
+    });
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      errorBox.textContent = "";
+      submit.disabled = true;
+      submit.textContent = "Connecting to Local Studio...";
+
+      try {
+        const username = document.getElementById("username").value.trim();
+        const data = await api("/api/auth/login", {
+          method: "POST",
+          body: {
+            username: username,
+            password: password.value,
+            remember: document.getElementById("remember").checked,
+          },
+        });
+
+        if (data.token) {
+          setToken(data.token);
+          setUser(data.user);
+          window.location.href = "index.html";
+        } else {
+          errorBox.textContent = "Login failed: No authorization token received.";
+        }
+      } catch (err) {
+        errorBox.textContent = err.message || "Failed to sign in. Verify local backend is running.";
+      } finally {
+        submit.disabled = false;
+        submit.textContent = "Enter Music Studio";
+      }
+    });
+  </script>
+</body>
+</html>
