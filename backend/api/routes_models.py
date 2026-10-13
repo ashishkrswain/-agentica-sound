@@ -1,67 +1,47 @@
-import os
-import threading
-from pathlib import Path
-from fastapi import APIRouter
-from backend.config import STORAGE_DIR
-from backend.core.musicgen_loader import musicgen_engine
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
+from typing import Optional
+from backend.core.model_manager import model_manager
 
 router = APIRouter(prefix="/api/models", tags=["models"])
 
-MODELS_DIR = STORAGE_DIR / "models"
-MODELS_DIR.mkdir(parents=True, exist_ok=True)
+class DownloadModelRequest(BaseModel):
+    repo_id: str
 
-download_state = {
-    "is_downloading": False,
-    "progress": 0,
-    "status": "idle",
-    "error": None
-}
+class HardwareModeRequest(BaseModel):
+    mode: str
 
-def _download_worker():
-    global download_state
-    try:
-        download_state["is_downloading"] = True
-        download_state["status"] = "Connecting to Hugging Face Hub (facebook/musicgen-small)..."
-        download_state["progress"] = 15
+class ActivateModelRequest(BaseModel):
+    model_id: str
 
-        from transformers import AutoProcessor, MusicgenForConditionalGeneration
-        
-        # Download and cache into local project directory
-        cache_path = str(MODELS_DIR)
-        download_state["status"] = "Downloading model weights & tokenizer (~1.2 GB)..."
-        download_state["progress"] = 45
-
-        processor = AutoProcessor.from_pretrained("facebook/musicgen-small", cache_dir=cache_path)
-        download_state["progress"] = 75
-        download_state["status"] = "Validating transformer tensor weights..."
-
-        model = MusicgenForConditionalGeneration.from_pretrained("facebook/musicgen-small", cache_dir=cache_path)
-        download_state["progress"] = 100
-        download_state["status"] = "Weights successfully cached locally in storage/models."
-        download_state["is_downloading"] = False
-
-    except Exception as e:
-        download_state["is_downloading"] = False
-        download_state["status"] = f"Download error: {str(e)}"
-        download_state["error"] = str(e)
+@router.get("/installed")
+def list_installed_models():
+    return {
+        "models": model_manager.list_installed_models(),
+        "runtime": model_manager.get_runtime_status()
+    }
 
 @router.get("/status")
 def get_model_status():
-    model_cached = any(MODELS_DIR.glob("**/*.safetensors")) or any(MODELS_DIR.glob("**/*.bin"))
-    return {
-        "is_cached": model_cached,
-        "models_dir": str(MODELS_DIR),
-        "download_state": download_state,
-        "engine_status": musicgen_engine.get_status()
-    }
+    return model_manager.get_runtime_status()
 
 @router.post("/download")
-def start_model_download():
-    global download_state
-    if download_state["is_downloading"]:
-        return {"success": False, "message": "Download is already in progress"}
-    
-    download_state["error"] = None
-    thread = threading.Thread(target=_download_worker, daemon=True)
-    thread.start()
-    return {"success": True, "message": "Model download initiated in background"}
+def download_model(req: DownloadModelRequest):
+    try:
+        model_manager.download_huggingface_model(req.repo_id)
+        return {"success": True, "message": f"Download initiated for {req.repo_id}"}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@router.post("/hardware-mode")
+def set_hardware_mode(req: HardwareModeRequest):
+    try:
+        model_manager.set_hardware_mode(req.mode)
+        return {"success": True, "mode": req.mode}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@router.post("/activate")
+def activate_model(req: ActivateModelRequest):
+    model_manager.set_active_model(req.model_id)
+    return {"success": True, "active_model": req.model_id}

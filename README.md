@@ -17,13 +17,27 @@
    - **Persistent Floating Audio Dock**: Uninterrupted playback across all studio views with track art, seek slider, and volume control.
    - **Clean Helvetica Typography**: Crisp typography using standard Helvetica Neue / Helvetica without emojis.
 
-2. **Local Hardware Engine**:
-   - **NVIDIA GPU Acceleration**: Live telemetry query for NVIDIA GeForce GTX 1650 (CUDA 12.8, VRAM monitoring, temperature, and utilization).
-   - **Zero-Cloud Architecture**: Runs completely on local hardware without recurring subscription fees or cloud token burn.
-   - **Hybrid Audio Synthesis**: Multi-track stereo 44.1kHz audio generator with drums, bass arpeggios, detuned supersaw chords, and melodic leads.
-   - **PyTorch / Transformers MusicGen Integration**: Ready adapter for `facebook/musicgen-small` token generation with dedicated offline Model Manager.
+2. **Hardware Execution Architecture Modes (Frontend Toggled)**:
+   - **Hybrid Offload (GPU + CPU + System RAM)**: Balances NVIDIA GTX 1650 (4GB VRAM) and 16GB System RAM to guarantee zero out-of-memory errors on large audio models.
+   - **Dedicated GPU (FP16 CUDA VRAM Only)**: Maximizes CUDA compute directly on the GPU for smaller models with ultra-fast inference.
+   - **CPU & System RAM (Zero VRAM)**: Pure 8-core multithreaded CPU computation, freeing 100% of GPU resources.
+   - **High-Fi Neural Synthesizer (Instant DSP)**: Built-in 44.1kHz stereo DSP engine with drum machines, bass arpeggios, chords, and leads with zero download and 0MB VRAM overhead.
 
-3. **Copy-Trader Mirrored UI Design**:
+3. **AI Musical Director (Big Model Blueprint Composer)**:
+   - **Cloud & Local LLM Integration**: Directly connects to:
+     - **NVIDIA NIM API** (`integrate.api.nvidia.com/v1`): Nemotron 340B, Llama 3.1 70B/405B, DeepSeek, GLM 4.
+     - **Ollama Local Engine** (`http://127.0.0.1:11434`): Directly connects to any local Ollama model.
+     - **LM Studio Local Engine** (`http://127.0.0.1:1234/v1`): OpenAI-compatible local GGUF server.
+     - **OpenAI-Compatible Custom Endpoints**: Any custom API key and URL.
+     - **Offline Music Theorist**: Built-in offline rule-based theorist fallback.
+   - **Automated Blueprint Composition**: Generates complete song blueprint (Title, Lyrics, Chords, BPM, Key, Tone, Style tags) with one click to offload local hardware.
+
+4. **Direct Hugging Face Repository Linkage**:
+   - **Seamless Codebase Storage**: Enter any Hugging Face repo ID (`facebook/musicgen-small`, `reach-vb/musicgen-song-generation`, etc.) to download directly into `storage/models/{repo_slug}`.
+   - **Zero Configuration Binding**: Downloaded models auto-bind immediately to the audio generation pipeline without external folder hunting.
+   - **Local Installed Models Manager**: View installed models, disk sizes, and activate any model for studio synthesis with one click.
+
+5. **Copy-Trader Mirrored UI Design**:
    - **Side Split Login (`login.html`)**: Left-side brand panel with clean AS mark, studio pitch, and hardware badges; right-side clean sign-in card with user ID, password toggle, and remember me checkbox.
    - **Workstation Layout (`index.html`)**:
      - **Left Sidebar**: Brand mark, studio navigation, live GPU status bar, and **User ID representation at the bottom left** (`ashish_local` / Studio Master profile with sign-out action).
@@ -62,11 +76,11 @@ agentica-music/
 ├── start.bat
 ├── storage/
 │   ├── tracks/                 # Generated WAV audio files
-│   ├── models/                 # Cached offline model weights
+│   ├── models/                 # Cached offline model weights (Hugging Face)
 │   └── agentica_sound.db       # SQLite track database
 ├── backend/
-│   ├── config.py               # Paths, ports, and defaults
-│   ├── main.py                 # FastAPI application
+│   ├── config.py               # Paths, ports, hardware modes, and defaults
+│   ├── main.py                 # FastAPI application & router mounting
 │   ├── domain/
 │   │   ├── song.py             # Track entity
 │   │   ├── hardware.py         # Hardware stats model
@@ -75,6 +89,8 @@ agentica-music/
 │   │   ├── security.py         # Session token verification
 │   │   ├── hardware_monitor.py # NVIDIA GPU & CPU profiler
 │   │   ├── lyrics_ai.py        # Lyricist generator & style matcher
+│   │   ├── llm_brain.py        # Musical Intelligence (NVIDIA NIM / Ollama / LM Studio)
+│   │   ├── model_manager.py    # Local model manager & Hugging Face downloader
 │   │   ├── audio_synth.py      # Multi-track stereo audio synthesizer
 │   │   └── musicgen_loader.py  # PyTorch MusicGen adapter
 │   ├── db/
@@ -83,7 +99,8 @@ agentica-music/
 │       ├── routes_auth.py      # Authentication endpoints
 │       ├── routes_music.py     # Music generation & audio streaming
 │       ├── routes_hardware.py  # GPU & system diagnostics
-│       └── routes_models.py    # Offline model management & downloads
+│       ├── routes_models.py    # Offline model management & downloads
+│       └── routes_intelligence.py # LLM Musical Director & blueprint endpoints
 └── frontend/
     ├── login.html              # Copy-Trader inspired split login
     ├── index.html              # 3-column studio dashboard
@@ -94,5 +111,6 @@ agentica-music/
             ├── config.js       # Client configuration
             ├── api.js          # REST client with auth headers
             ├── player.js       # Waveform visualizer & audio engine
-            └── app.js          # Studio controller & UI events
+            └── app.js          # Studio controller, hardware toggles & LLM director
 ```
+

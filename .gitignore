@@ -5,3 +5,8 @@ __pycache__/
 .venv/
 env/
 venv/
+
+# Large model checkpoints (safetensors / bin)
+storage/models/*
+!storage/models/.gitkeep
+

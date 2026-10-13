@@ -9,6 +9,7 @@ from backend.api.routes_auth import router as auth_router
 from backend.api.routes_music import router as music_router
 from backend.api.routes_hardware import router as hardware_router
 from backend.api.routes_models import router as models_router
+from backend.api.routes_intelligence import router as intelligence_router
 from backend.db.repository import track_repo, Track
 from backend.core.audio_synth import generate_music_track
 
@@ -31,6 +32,7 @@ app.include_router(auth_router)
 app.include_router(music_router)
 app.include_router(hardware_router)
 app.include_router(models_router)
+app.include_router(intelligence_router)
 
 # Mount static files
 static_dir = FRONTEND_DIR / "static"
