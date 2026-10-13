@@ -4,25 +4,27 @@
 
 ---
 
-## 🌟 Key Features
+## Key Features
 
 1. **Suno AI-Style Music Generation**:
    - **Dual Variations Generation**: Concurrently creates **Track [V1]** and **Track [V2]** for each prompt with distinct seeds and rhythmic variations, matching Suno AI's signature dual-generation workflow.
    - **Simple & Custom Modes**:
      - *Simple Mode*: Natural language prompt describing mood, genre, and instruments.
      - *Custom Mode*: Song title, style tags, and structured lyrics with section markers (`[Verse]`, `[Chorus]`, `[Bridge]`, `[Guitar Solo]`, `[Outro]`).
+   - **Custom Duration Input**: Specify custom duration from 5 to 360 seconds (up to 6 minutes).
    - **AI Lyricist Lab**: Built-in intelligent lyric writer that crafts genre-aligned verses, choruses, and hooks with rhyming cadence.
    - **Interactive Waveform Player**: Real-time canvas rendering of audio amplitude peaks with seekable scrub-bar, loop, restart, and master playback.
    - **Persistent Floating Audio Dock**: Uninterrupted playback across all studio views with track art, seek slider, and volume control.
+   - **Clean Helvetica Typography**: Crisp typography using standard Helvetica Neue / Helvetica without emojis.
 
 2. **Local Hardware Engine**:
    - **NVIDIA GPU Acceleration**: Live telemetry query for NVIDIA GeForce GTX 1650 (CUDA 12.8, VRAM monitoring, temperature, and utilization).
    - **Zero-Cloud Architecture**: Runs completely on local hardware without recurring subscription fees or cloud token burn.
    - **Hybrid Audio Synthesis**: Multi-track stereo 44.1kHz audio generator with drums, bass arpeggios, detuned supersaw chords, and melodic leads.
-   - **PyTorch / Transformers MusicGen Integration**: Ready adapter for `facebook/musicgen-small` token generation.
+   - **PyTorch / Transformers MusicGen Integration**: Ready adapter for `facebook/musicgen-small` token generation with dedicated offline Model Manager.
 
 3. **Copy-Trader Mirrored UI Design**:
-   - **Side Split Login (`login.html`)**: Left-side brand panel with musical glyph mark, studio pitch, and hardware badges; right-side clean sign-in card with user ID, password toggle, and remember me checkbox.
+   - **Side Split Login (`login.html`)**: Left-side brand panel with clean AS mark, studio pitch, and hardware badges; right-side clean sign-in card with user ID, password toggle, and remember me checkbox.
    - **Workstation Layout (`index.html`)**:
      - **Left Sidebar**: Brand mark, studio navigation, live GPU status bar, and **User ID representation at the bottom left** (`ashish_local` / Studio Master profile with sign-out action).
      - **Center Main Content**: Live system clock, CUDA active badge, top metric stat cards, and the Creation Studio.
@@ -30,7 +32,7 @@
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Launch the Server
 
@@ -51,7 +53,7 @@ cd C:\git_boom\agentica-music
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 ```
 agentica-music/
@@ -60,6 +62,7 @@ agentica-music/
 ├── start.bat
 ├── storage/
 │   ├── tracks/                 # Generated WAV audio files
+│   ├── models/                 # Cached offline model weights
 │   └── agentica_sound.db       # SQLite track database
 ├── backend/
 │   ├── config.py               # Paths, ports, and defaults
@@ -79,13 +82,14 @@ agentica-music/
 │   └── api/
 │       ├── routes_auth.py      # Authentication endpoints
 │       ├── routes_music.py     # Music generation & audio streaming
-│       └── routes_hardware.py  # GPU & system diagnostics
+│       ├── routes_hardware.py  # GPU & system diagnostics
+│       └── routes_models.py    # Offline model management & downloads
 └── frontend/
     ├── login.html              # Copy-Trader inspired split login
     ├── index.html              # 3-column studio dashboard
     └── static/
         ├── css/
-        │   └── app.css         # Workstation CSS stylesheet
+        │   └── app.css         # Workstation Helvetica CSS stylesheet
         └── js/
             ├── config.js       # Client configuration
             ├── api.js          # REST client with auth headers
