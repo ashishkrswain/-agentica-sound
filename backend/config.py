@@ -35,3 +35,5 @@ HARDWARE_MODES = {
 DEFAULT_OLLAMA_URL = "http://127.0.0.1:11434"
 DEFAULT_LM_STUDIO_URL = "http://127.0.0.1:1234/v1"
 DEFAULT_NVIDIA_URL = "https://integrate.api.nvidia.com/v1"
+DEFAULT_GROK_URL = "https://api.x.ai/v1"
+DEFAULT_OPENAI_URL = "https://api.openai.com/v1"
