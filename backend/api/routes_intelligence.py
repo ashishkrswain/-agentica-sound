@@ -9,6 +9,10 @@ class ConfigUpdateRequest(BaseModel):
     provider: Optional[str] = None
     nvidia_api_key: Optional[str] = None
     nvidia_model: Optional[str] = None
+    nvidia_base_url: Optional[str] = None
+    grok_api_key: Optional[str] = None
+    grok_model: Optional[str] = None
+    grok_base_url: Optional[str] = None
     openai_api_key: Optional[str] = None
     openai_base_url: Optional[str] = None
     openai_model: Optional[str] = None
@@ -23,6 +27,11 @@ class TestConnectionRequest(BaseModel):
 class ComposeRequest(BaseModel):
     prompt: str
     genre_hint: Optional[str] = None
+
+class ConsultRequest(BaseModel):
+    prompt: str
+    genre_hint: Optional[str] = None
+    consultation_notes: Optional[str] = None
 
 @router.get("/config")
 def get_config():
@@ -46,4 +55,15 @@ def compose_song(req: ComposeRequest):
     return {
         "success": True,
         "blueprint": blueprint
+    }
+
+@router.post("/consult")
+def consult_song(req: ConsultRequest):
+    if not req.prompt.strip():
+        raise HTTPException(status_code=400, detail="Prompt is required for musical consultation")
+    
+    result = musical_intelligence.consult_and_generate(req.prompt, req.genre_hint, req.consultation_notes)
+    return {
+        "success": True,
+        "consultation": result
     }
