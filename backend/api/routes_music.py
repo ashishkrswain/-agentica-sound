@@ -75,14 +75,26 @@ def api_generate_music(req: MusicGenerateRequest):
         # Slight variation in tempo/melody for second variation like Suno
         var_bpm = bpm if idx == 0 else int(bpm * random.choice([0.98, 1.02, 1.0]))
 
-        file_path, waveform_peaks, actual_duration = generate_music_track(
-            track_id=track_id,
-            title=title,
-            genre=genre,
-            bpm=var_bpm,
-            duration_sec=req.duration,
-            seed=var_seed
-        )
+        # Engine dispatch: PyTorch MusicGen vs Local High-Fi Neural Synthesizer
+        if req.engine == "MusicGen-Small":
+            from backend.core.musicgen_loader import musicgen_engine
+            file_path, waveform_peaks, actual_duration = musicgen_engine.generate(
+                track_id=track_id,
+                prompt=req.prompt,
+                genre=genre,
+                bpm=var_bpm,
+                duration_sec=req.duration,
+                seed=var_seed
+            )
+        else:
+            file_path, waveform_peaks, actual_duration = generate_music_track(
+                track_id=track_id,
+                title=title,
+                genre=genre,
+                bpm=var_bpm,
+                duration_sec=req.duration,
+                seed=var_seed
+            )
 
         audio_url = f"/api/music/audio/{track_id}.wav"
         track_title = f"{title} [{var_label.upper()}]" if req.dual_variations else title

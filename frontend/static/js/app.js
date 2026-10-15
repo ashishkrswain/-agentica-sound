@@ -331,6 +331,24 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (t) window.player.loadTrack(t, true);
   };
 
+  const librarySearchInput = document.getElementById("library-search-input");
+  if (librarySearchInput) {
+    librarySearchInput.addEventListener("input", (e) => {
+      const q = e.target.value.toLowerCase().trim();
+      if (!q) {
+        renderLibraryTable(tracks);
+        return;
+      }
+      const filtered = tracks.filter(t => 
+        (t.title && t.title.toLowerCase().includes(q)) ||
+        (t.genre && t.genre.toLowerCase().includes(q)) ||
+        (t.key && t.key.toLowerCase().includes(q)) ||
+        (t.style_tags && t.style_tags.toLowerCase().includes(q))
+      );
+      renderLibraryTable(filtered);
+    });
+  }
+
   // Generation Action
   const btnCreate = document.getElementById("btn-create");
   const progressBar = document.getElementById("gen-progress");

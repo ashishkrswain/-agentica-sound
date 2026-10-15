@@ -50,6 +50,18 @@ PROGRESSIONS = {
         ["G3", "D4", "G4"],  # G5
         ["A3", "E4", "A4"],  # A5
         ["C3", "G3", "C4"],  # C5
+    ],
+    "Acoustic Pop": [
+        ["C4", "E4", "G4"],  # C
+        ["G3", "B3", "D4"],  # G
+        ["A3", "C4", "E4"],  # Am
+        ["F3", "A3", "C4"],  # F
+    ],
+    "Ambient Dream": [
+        ["F3", "A3", "C4", "E4"],  # Fmaj7
+        ["G3", "B3", "D4", "E4"],  # G6
+        ["E3", "G3", "B3", "D4"],  # Em7
+        ["A3", "C4", "E4", "G4"],  # Am7
     ]
 }
 
@@ -166,15 +178,21 @@ def generate_music_track(
         if pos >= total_samples:
             break
 
-        # Kick on beats 1 and 3 (or 4-on-the-floor for House/Synthwave)
-        is_kick = (b % 4 == 0) or (b % 4 == 2 and genre not in ["Rock", "Cinematic Epic"]) or (genre in ["Deep House", "Synthwave"] and b % 2 == 0)
+        # Kick on beats 1 and 3 (or 4-on-the-floor for House/Synthwave; subtle for Ambient)
+        if genre == "Ambient Dream":
+            is_kick = (b % 8 == 0)  # Gentle pulse every 2 bars
+            kick_vol = 0.35
+        else:
+            is_kick = (b % 4 == 0) or (b % 4 == 2 and genre not in ["Rock", "Cinematic Epic"]) or (genre in ["Deep House", "Synthwave"] and b % 2 == 0)
+            kick_vol = 0.7
+
         if is_kick:
             k_len = min(len(kick), total_samples - pos)
-            left_master[pos:pos+k_len] += kick[:k_len] * 0.7
-            right_master[pos:pos+k_len] += kick[:k_len] * 0.7
+            left_master[pos:pos+k_len] += kick[:k_len] * kick_vol
+            right_master[pos:pos+k_len] += kick[:k_len] * kick_vol
 
-        # Snare on beats 2 and 4
-        if b % 4 == 2 or (genre in ["Rock", "Cyberpunk", "Synthwave"] and (b % 4 == 1 or b % 4 == 3)):
+        # Snare on beats 2 and 4 (omit for Ambient Dream)
+        if genre != "Ambient Dream" and (b % 4 == 2 or (genre in ["Rock", "Cyberpunk", "Synthwave"] and (b % 4 == 1 or b % 4 == 3))):
             s_len = min(len(snare), total_samples - pos)
             left_master[pos:pos+s_len] += snare[:s_len] * 0.6
             right_master[pos:pos+s_len] += snare[:s_len] * 0.6
@@ -272,12 +290,18 @@ def generate_music_track(
     wav.write(file_path, sr, audio_int16)
 
     # 7. Compute 120 waveform peak points for UI canvas
-    mono = np.mean(np.abs(stereo), axis=1)
-    chunk_size = max(1, len(mono) // 120)
+    waveform_peaks = compute_waveform_peaks(stereo, num_peaks=120)
+    return file_path, waveform_peaks, duration_sec
+
+def compute_waveform_peaks(audio_data: np.ndarray, num_peaks: int = 120) -> List[float]:
+    if len(audio_data.shape) > 1:
+        mono = np.mean(np.abs(audio_data), axis=1)
+    else:
+        mono = np.abs(audio_data)
+    chunk_size = max(1, len(mono) // num_peaks)
     waveform_peaks = []
-    for i in range(120):
+    for i in range(num_peaks):
         chunk = mono[i * chunk_size : (i + 1) * chunk_size]
         peak = float(np.max(chunk)) if len(chunk) > 0 else 0.05
         waveform_peaks.append(round(min(1.0, max(0.08, peak)), 3))
-
-    return file_path, waveform_peaks, duration_sec
+    return waveform_peaks
