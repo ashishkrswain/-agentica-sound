@@ -23,21 +23,32 @@
    - **CPU & System RAM (Zero VRAM)**: Pure 8-core multithreaded CPU computation, freeing 100% of GPU resources.
    - **High-Fi Neural Synthesizer (Instant DSP)**: Built-in 44.1kHz stereo DSP engine with drum machines, bass arpeggios, chords, and leads with zero download and 0MB VRAM overhead.
 
-3. **AI Musical Director (Big Model Blueprint Composer)**:
-   - **Cloud & Local LLM Integration**: Directly connects to:
-     - **NVIDIA NIM API** (`integrate.api.nvidia.com/v1`): Nemotron 340B, Llama 3.1 70B/405B, DeepSeek, GLM 4.
-     - **Ollama Local Engine** (`http://127.0.0.1:11434`): Directly connects to any local Ollama model.
+3. **AI Musical Director & Dialogue Studio ("Talk with the AI")**:
+   - **Multi-Provider Cloud & Local LLM Integration**: Directly connects to:
+     - **xAI Grok API** (`https://api.x.ai/v1`): Flagship `grok-beta`, fast `grok-2-mini`, `grok-2`, `grok-vision-beta`.
+     - **NVIDIA NIM API** (`https://integrate.api.nvidia.com/v1`): Nemotron 340B, Llama 3.1 (8B Free / 70B / 405B), DeepSeek, GLM 4.
+     - **OpenAI API & Compatible Endpoints** (`https://api.openai.com/v1`): `gpt-4o-mini`, `gpt-4o`, custom open-source proxies.
+     - **Ollama Local Engine** (`http://127.0.0.1:11434`): Direct connection to local Ollama models (`llama3`, `mistral`, `deepseek-r1`).
      - **LM Studio Local Engine** (`http://127.0.0.1:1234/v1`): OpenAI-compatible local GGUF server.
-     - **OpenAI-Compatible Custom Endpoints**: Any custom API key and URL.
      - **Offline Music Theorist**: Built-in offline rule-based theorist fallback.
-   - **Automated Blueprint Composition**: Generates complete song blueprint (Title, Lyrics, Chords, BPM, Key, Tone, Style tags) with one click to offload local hardware.
+   - **Interactive Producer Consultation ("Talk with the AI")**:
+     - Discuss your song vision, genre, story, and ask specific creative questions.
+     - Receive detailed producer guidance covering chords, key, BPM, arrangement dynamics, and sound design.
+     - Crafts full structured lyrics with section markers (`[Intro]`, `[Verse 1]`, `[Chorus]`, `[Guitar Solo]`, `[Bridge]`, `[Outro]`).
+     - **Direct Hardware Bridge**: 1-click **"Feed Lyrics & Blueprint to Local Hardware Model"** transfers all parameters into the Local Studio to immediately create music on your local hardware.
 
-4. **Direct Hugging Face Repository Linkage**:
+4. **Dedicated Settings Area for APIs & Custom Models**:
+   - **Free Model Presets & Custom Model Input**: Select from recommended free tier models (e.g. `grok-2-mini`, `meta/llama-3.1-8b-instruct`, `gpt-4o-mini`) or copy-paste any custom model ID.
+   - **Masked API Key Management**: Secure password field with show/hide toggle.
+   - **Live Connection Testing**: Verify endpoint health and latency with one-click connection tests.
+   - **Dedicated Scope**: Configured APIs are solely utilized for lyrics, chords, and dialogue consultation, keeping 100% of local GPU VRAM available for audio synthesis.
+
+5. **Direct Hugging Face Repository Linkage**:
    - **Seamless Codebase Storage**: Enter any Hugging Face repo ID (`facebook/musicgen-small`, `reach-vb/musicgen-song-generation`, etc.) to download directly into `storage/models/{repo_slug}`.
    - **Zero Configuration Binding**: Downloaded models auto-bind immediately to the audio generation pipeline without external folder hunting.
    - **Local Installed Models Manager**: View installed models, disk sizes, and activate any model for studio synthesis with one click.
 
-5. **Copy-Trader Mirrored UI Design**:
+6. **Copy-Trader Mirrored UI Design**:
    - **Side Split Login (`login.html`)**: Left-side brand panel with clean AS mark, studio pitch, and hardware badges; right-side clean sign-in card with user ID, password toggle, and remember me checkbox.
    - **Workstation Layout (`index.html`)**:
      - **Left Sidebar**: Brand mark, studio navigation, live GPU status bar, and **User ID representation at the bottom left** (`ashish_local` / Studio Master profile with sign-out action).
