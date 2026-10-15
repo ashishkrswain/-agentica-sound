@@ -351,20 +351,71 @@
         </div>
       </section>
 
-      <!-- VIEW: Lyrics Lab -->
+      <!-- VIEW: Lyrics Lab & AI Music Consultant -->
       <section class="view" id="view-lyrics">
-        <div style="background:#fff; border:1px solid var(--border); border-radius:8px; padding:20px;">
-          <h2 style="font-size:15px; margin:0 0 10px;">AI Lyrics Studio</h2>
-          <p style="color:var(--muted); font-size:12.5px; margin-bottom:16px;">
-            The built-in lyricist generates song sections with rhyming cadence, verse/chorus patterns, and emotional mood tailored to your style.
-          </p>
-          <div class="field">
-            <label>Lyric Prompt / Theme</label>
-            <input type="text" id="lyrics-theme-input" placeholder="e.g. Midnight neon highway drive into the sunrise..." />
+        <div class="consultant-container">
+          <!-- Left Column: Talk with AI Music Producer -->
+          <div class="consultant-panel">
+            <div class="consultant-title">
+              <h2>Talk with AI Music Producer</h2>
+              <span class="badge" style="background:var(--accent-soft); color:var(--accent); font-weight:600; font-size:11px; padding:3px 8px; border-radius:4px;">Creative Director</span>
+            </div>
+            <p style="color:var(--muted); font-size:12px; margin-bottom:14px; line-height:1.5;">
+              Discuss your music ideas with the AI (powered by Grok, NVIDIA NIM, or OpenAI). Ask for musical direction, chord advice, mood suggestions, and have it craft full structured lyrics tailored for your local hardware model.
+            </p>
+
+            <div class="field">
+              <label for="consult-prompt-input">Music Concept, Story & Vision</label>
+              <textarea class="prompt-area" id="consult-prompt-input" rows="3" placeholder="Describe the vibe, story, or feeling of the song (e.g. Midnight neon highway drive in the rain, yearning for freedom with nostalgic analog synthesizers)...">Midnight neon highway drive in the rain, yearning for freedom with nostalgic analog synthesizers</textarea>
+            </div>
+
+            <div class="field">
+              <label for="consult-genre-input">Musical Genre & Style</label>
+              <input type="text" id="consult-genre-input" value="Synthwave" placeholder="e.g. Synthwave, Lo-Fi Chillhop, Cyberpunk, Cinematic, Rock..." />
+            </div>
+
+            <div class="field">
+              <label for="consult-notes-input">Consultation Questions & Creative Direction</label>
+              <textarea class="prompt-area" id="consult-notes-input" rows="3" placeholder="Ask specific questions or outline what kind of feedback you want (e.g. What chords and tempo should I use? Suggest arrangement dynamics and write catchy, poetic lyrics for verse and chorus)...">What chords and tempo should I use? Suggest arrangement dynamics and write catchy, poetic lyrics for verse and chorus.</textarea>
+            </div>
+
+            <button class="btn-primary" id="btn-consult-ai" style="width:100%; padding:11px; font-size:13px; font-weight:700; margin-top:6px;" type="button">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px; margin-right:6px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+              Talk with AI & Get Musical Feedback
+            </button>
           </div>
-          <button class="btn-primary" style="width:auto; padding:8px 18px;" type="button" onclick="document.getElementById('btn-ai-lyrics').click(); alert('Lyrics generated and sent to the creation studio!');">
-            Generate Lyrics for Studio
-          </button>
+
+          <!-- Right Column: AI Producer Feedback & Generated Lyrics -->
+          <div class="consultant-panel">
+            <div class="consultant-title">
+              <h2>Producer Feedback & Structured Lyrics</h2>
+              <span id="consult-provider-badge" class="badge" style="background:var(--surface2); color:var(--text-dim); font-size:10.5px; padding:3px 7px; border-radius:4px;">Awaiting Prompt</span>
+            </div>
+
+            <!-- Feedback Card -->
+            <label style="font-size:11.5px; font-weight:600; color:var(--text-dim); display:block; margin-bottom:6px;">Producer Musical Guidance & Arrangement:</label>
+            <div class="producer-feedback-box" id="consult-feedback-box">
+              Click <strong>"Talk with AI & Get Musical Feedback"</strong> to receive personalized advice on chords, BPM, key, sound design, and arrangement dynamics from your configured AI model.
+            </div>
+
+            <!-- Structured Lyrics Monospace Editor -->
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+              <label style="font-size:11.5px; font-weight:600; color:var(--text-dim);">Structured Song Lyrics:</label>
+              <div class="tag-helpers">
+                <button class="btn-tag" data-tag="[Verse]" type="button" onclick="insertConsultTag('[Verse]')">[Verse]</button>
+                <button class="btn-tag" data-tag="[Chorus]" type="button" onclick="insertConsultTag('[Chorus]')">[Chorus]</button>
+                <button class="btn-tag" data-tag="[Bridge]" type="button" onclick="insertConsultTag('[Bridge]')">[Bridge]</button>
+                <button class="btn-tag" data-tag="[Outro]" type="button" onclick="insertConsultTag('[Outro]')">[Outro]</button>
+              </div>
+            </div>
+            <textarea class="lyrics-area" id="consult-lyrics-editor" rows="10" placeholder="Generated lyrics will appear here ready to review and edit..."></textarea>
+
+            <!-- The Hardware Bridge Button -->
+            <button class="btn-feed-hardware" id="btn-feed-to-hardware" type="button">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              Feed Lyrics & Blueprint to Local Hardware Model & Create Music
+            </button>
+          </div>
         </div>
       </section>
 
@@ -440,11 +491,113 @@
         </div>
       </section>
 
-      <!-- VIEW: Audio Settings -->
+      <!-- VIEW: Settings -->
       <section class="view" id="view-settings">
-        <div style="background:#fff; border:1px solid var(--border); border-radius:8px; padding:20px;">
-          <h2 style="font-size:15px; margin:0 0 10px;">Studio Audio Settings</h2>
-          <div class="field" style="max-width:320px;">
+        <!-- AI Intelligence & Lyrics Director API Configuration Card -->
+        <div class="settings-section-card">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <h2 class="settings-section-title">AI Intelligence & Lyrics Director API</h2>
+            <span id="settings-api-badge" class="api-badge">
+              <span class="dot dot-stop"></span> Not Connected
+            </span>
+          </div>
+          <p class="settings-section-desc">
+            Connect to <strong>xAI Grok API</strong>, <strong>NVIDIA NIM API</strong>, <strong>OpenAI API</strong>, or local LLM engines. This API is used exclusively for lyrics generation, musical feedback, and chord blueprint composition, keeping your local NVIDIA GTX 1650 and RAM solely dedicated to generating audio.
+          </p>
+
+          <div class="settings-grid-2">
+            <div class="field" style="margin:0;">
+              <label for="settings-provider-select">API Provider</label>
+              <select id="settings-provider-select">
+                <option value="grok">xAI Grok API (api.x.ai)</option>
+                <option value="nvidia">NVIDIA NIM API (integrate.api.nvidia.com)</option>
+                <option value="openai">OpenAI API (api.openai.com)</option>
+                <option value="ollama">Ollama Local Engine (127.0.0.1:11434)</option>
+                <option value="lm_studio">LM Studio Local Engine (127.0.0.1:1234)</option>
+                <option value="custom">Custom OpenAI-Compatible API</option>
+                <option value="offline">Built-in Offline Music Theorist (Fallback)</option>
+              </select>
+            </div>
+
+            <div class="field" style="margin:0;">
+              <label for="settings-preset-models">Select Free or Recommended Model</label>
+              <select id="settings-preset-models">
+                <option value="" disabled selected>-- Choose a recommended model --</option>
+                <optgroup label="xAI Grok Models">
+                  <option value="grok-beta">grok-beta (Flagship Grok)</option>
+                  <option value="grok-2-mini">grok-2-mini (Fast & Cost Effective)</option>
+                  <option value="grok-2">grok-2 (Advanced Reasoning)</option>
+                  <option value="grok-vision-beta">grok-vision-beta</option>
+                </optgroup>
+                <optgroup label="NVIDIA NIM (Free Credits)">
+                  <option value="meta/llama-3.1-8b-instruct">meta/llama-3.1-8b-instruct (Fast & Free)</option>
+                  <option value="meta/llama-3.1-70b-instruct">meta/llama-3.1-70b-instruct (High Quality)</option>
+                  <option value="nvidia/nemotron-4-340b-instruct">nvidia/nemotron-4-340b-instruct (Deep Reasoning)</option>
+                  <option value="deepseek-ai/deepseek-coder-33b-instruct">deepseek-ai/deepseek-coder-33b-instruct</option>
+                  <option value="THUDM/glm-4-9b-chat">THUDM/glm-4-9b-chat (GLM 4)</option>
+                  <option value="mistralai/mixtral-8x7b-instruct-v0.1">mistralai/mixtral-8x7b-instruct-v0.1</option>
+                </optgroup>
+                <optgroup label="OpenAI Models">
+                  <option value="gpt-4o-mini">gpt-4o-mini (Free / Low Cost Tier)</option>
+                  <option value="gpt-4o">gpt-4o (Omni Flagship)</option>
+                  <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
+                </optgroup>
+                <optgroup label="Local Ollama / LM Studio">
+                  <option value="llama3">llama3</option>
+                  <option value="mistral">mistral</option>
+                  <option value="deepseek-r1">deepseek-r1</option>
+                  <option value="qwen2.5">qwen2.5</option>
+                </optgroup>
+              </select>
+            </div>
+          </div>
+
+          <div class="field" style="margin-bottom:14px;">
+            <label for="settings-model-input">Model Name (Selected from above or paste any custom model string)</label>
+            <input type="text" id="settings-model-input" placeholder="e.g. grok-beta, grok-2-mini, meta/llama-3.1-70b-instruct or custom model ID" style="font-family:var(--mono);" />
+            <div class="quick-models-bar">
+              <span style="font-size:10.5px; color:var(--dim); align-self:center;">Quick Paste:</span>
+              <button type="button" class="btn-quick-model" data-m="grok-2-mini">grok-2-mini</button>
+              <button type="button" class="btn-quick-model" data-m="grok-beta">grok-beta</button>
+              <button type="button" class="btn-quick-model" data-m="meta/llama-3.1-8b-instruct">llama-3.1-8b (Free)</button>
+              <button type="button" class="btn-quick-model" data-m="meta/llama-3.1-70b-instruct">llama-3.1-70b</button>
+              <button type="button" class="btn-quick-model" data-m="nvidia/nemotron-4-340b-instruct">nemotron-340b</button>
+              <button type="button" class="btn-quick-model" data-m="deepseek-ai/deepseek-coder-33b-instruct">deepseek</button>
+              <button type="button" class="btn-quick-model" data-m="gpt-4o-mini">gpt-4o-mini</button>
+            </div>
+          </div>
+
+          <div class="settings-grid-2">
+            <div class="field" id="settings-key-field" style="margin:0;">
+              <label for="settings-api-key-input">API Key (xAI Grok / NVIDIA NIM / OpenAI)</label>
+              <div style="position:relative;">
+                <input type="password" id="settings-api-key-input" placeholder="xai-... / nvapi-... / sk-..." style="font-family:var(--mono); padding-right:60px;" />
+                <button type="button" id="btn-toggle-key-mask" style="position:absolute; right:8px; top:50%; transform:translateY(-50%); background:transparent; border:none; color:var(--muted); font-size:11px; cursor:pointer;">Show</button>
+              </div>
+            </div>
+
+            <div class="field" style="margin:0;">
+              <label for="settings-url-input">API Endpoint Base URL</label>
+              <input type="text" id="settings-url-input" placeholder="https://api.x.ai/v1 or https://integrate.api.nvidia.com/v1" style="font-family:var(--mono);" />
+            </div>
+          </div>
+
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:16px; padding-top:14px; border-top:1px solid var(--border);">
+            <div style="font-size:11.5px; color:var(--muted);" id="settings-status-note">
+              Configured API will be used exclusively for lyrics and musical direction.
+            </div>
+            <div style="display:flex; gap:10px;">
+              <button class="btn-secondary" id="settings-btn-test" style="padding:7px 16px; font-size:12px;" type="button">Test Connection</button>
+              <button class="btn-primary" id="settings-btn-save" style="width:auto; padding:7px 20px; font-size:12px;" type="button">Save API Settings</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Studio Audio Settings Card -->
+        <div class="settings-section-card">
+          <h2 class="settings-section-title">Local Studio Audio & Storage Configuration</h2>
+          <p class="settings-section-desc">Sample rates, bit depth, and storage paths for generated audio tracks.</p>
+          <div class="field" style="max-width:360px;">
             <label>Output Sample Rate</label>
             <select>
               <option selected>44.1 kHz (CD / Studio Quality)</option>
@@ -452,16 +605,16 @@
               <option>48.0 kHz (Cinema High-Res)</option>
             </select>
           </div>
-          <div class="field" style="max-width:320px;">
+          <div class="field" style="max-width:360px;">
             <label>Audio Bit Depth</label>
             <select>
               <option selected>16-bit PCM Linear WAV</option>
               <option>24-bit PCM High Dynamics</option>
             </select>
           </div>
-          <div class="field" style="max-width:320px;">
-            <label>Storage Path</label>
-            <input type="text" value="C:\git_boom\agentica-music\storage\tracks" readonly />
+          <div class="field" style="max-width:420px;">
+            <label>Local Storage Path</label>
+            <input type="text" value="C:\git_boom\agentica-music\storage\tracks" readonly style="font-family:var(--mono); font-size:12px;" />
           </div>
         </div>
       </section>
