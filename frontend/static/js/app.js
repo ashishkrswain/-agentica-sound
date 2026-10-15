@@ -495,21 +495,77 @@ document.addEventListener("DOMContentLoaded", async () => {
   const btnLlmCompose = document.getElementById("btn-llm-compose");
   const blueprintCard = document.getElementById("blueprint-card");
 
+  // Settings View Elements
+  const settingsProviderSelect = document.getElementById("settings-provider-select");
+  const settingsPresetModels = document.getElementById("settings-preset-models");
+  const settingsModelInput = document.getElementById("settings-model-input");
+  const settingsApiKeyInput = document.getElementById("settings-api-key-input");
+  const settingsUrlInput = document.getElementById("settings-url-input");
+  const settingsApiBadge = document.getElementById("settings-api-badge");
+  const settingsBtnTest = document.getElementById("settings-btn-test");
+  const settingsBtnSave = document.getElementById("settings-btn-save");
+  const btnToggleKeyMask = document.getElementById("btn-toggle-key-mask");
+
+  // Lyrics Lab & Consultant Elements
+  const consultPromptInput = document.getElementById("consult-prompt-input");
+  const consultGenreInput = document.getElementById("consult-genre-input");
+  const consultNotesInput = document.getElementById("consult-notes-input");
+  const btnConsultAi = document.getElementById("btn-consult-ai");
+  const consultFeedbackBox = document.getElementById("consult-feedback-box");
+  const consultLyricsEditor = document.getElementById("consult-lyrics-editor");
+  const consultProviderBadge = document.getElementById("consult-provider-badge");
+  const btnFeedToHardware = document.getElementById("btn-feed-to-hardware");
+
+  let currentConsultation = null;
+
   async function loadLlmConfig() {
     try {
       const cfg = await api("/api/intelligence/config");
-      if (llmProviderSelect) llmProviderSelect.value = cfg.provider || "offline";
-      if (llmModelInput) {
-        if (cfg.provider === "nvidia") llmModelInput.value = cfg.nvidia_model || "meta/llama-3.1-70b-instruct";
-        else if (cfg.provider === "ollama") llmModelInput.value = cfg.ollama_model || "llama3";
-        else if (cfg.provider === "lm_studio") llmModelInput.value = cfg.lm_studio_model || "local-model";
-        else if (cfg.provider === "openai") llmModelInput.value = cfg.openai_model || "gpt-4o-mini";
+      const prov = cfg.provider || "offline";
+      
+      if (llmProviderSelect) llmProviderSelect.value = prov;
+      if (settingsProviderSelect) settingsProviderSelect.value = prov;
+
+      let activeModel = "";
+      let activeUrl = "";
+
+      if (prov === "grok") {
+        activeModel = cfg.grok_model || "grok-beta";
+        activeUrl = cfg.grok_base_url || "https://api.x.ai/v1";
+      } else if (prov === "nvidia") {
+        activeModel = cfg.nvidia_model || "meta/llama-3.1-70b-instruct";
+        activeUrl = cfg.nvidia_base_url || "https://integrate.api.nvidia.com/v1";
+      } else if (prov === "openai") {
+        activeModel = cfg.openai_model || "gpt-4o-mini";
+        activeUrl = cfg.openai_base_url || "https://api.openai.com/v1";
+      } else if (prov === "ollama") {
+        activeModel = cfg.ollama_model || "llama3";
+        activeUrl = cfg.ollama_url || "http://127.0.0.1:11434";
+      } else if (prov === "lm_studio") {
+        activeModel = cfg.lm_studio_model || "local-model";
+        activeUrl = cfg.lm_studio_url || "http://127.0.0.1:1234/v1";
       }
-      if (llmBaseUrlInput) {
-        if (cfg.provider === "ollama") llmBaseUrlInput.value = cfg.ollama_url || "http://127.0.0.1:11434";
-        else if (cfg.provider === "lm_studio") llmBaseUrlInput.value = cfg.lm_studio_url || "http://127.0.0.1:1234/v1";
-        else if (cfg.provider === "openai") llmBaseUrlInput.value = cfg.openai_base_url || "https://api.openai.com/v1";
+
+      if (llmModelInput) llmModelInput.value = activeModel;
+      if (settingsModelInput) settingsModelInput.value = activeModel;
+      if (llmBaseUrlInput) llmBaseUrlInput.value = activeUrl;
+      if (settingsUrlInput) settingsUrlInput.value = activeUrl;
+
+      // Status Badges
+      const hasKey = (prov === "grok" && cfg.has_grok_key) || (prov === "nvidia" && cfg.has_nvidia_key) || (prov === "openai" && cfg.has_openai_key);
+      if (settingsApiBadge) {
+        if (hasKey || prov === "ollama" || prov === "lm_studio") {
+          settingsApiBadge.className = "api-badge connected";
+          settingsApiBadge.innerHTML = `<span class="dot dot-run"></span> Configured (${prov.toUpperCase()})`;
+        } else if (prov === "offline") {
+          settingsApiBadge.className = "api-badge";
+          settingsApiBadge.innerHTML = `<span class="dot dot-stop"></span> Built-in Offline Theorist`;
+        } else {
+          settingsApiBadge.className = "api-badge error";
+          settingsApiBadge.innerHTML = `<span class="dot dot-busy"></span> API Key Missing`;
+        }
       }
+
       updateLlmFieldVisibility();
     } catch (e) {
       console.log("Could not load LLM config:", e);
@@ -517,11 +573,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function updateLlmFieldVisibility() {
-    const prov = llmProviderSelect ? llmProviderSelect.value : "offline";
-    if (prov === "nvidia" || prov === "openai") {
+    const prov = (llmProviderSelect ? llmProviderSelect.value : (settingsProviderSelect ? settingsProviderSelect.value : "offline"));
+    if (prov === "grok" || prov === "nvidia" || prov === "openai") {
       if (llmKeyRow) llmKeyRow.style.display = "block";
-      if (llmUrlRow) llmUrlRow.style.display = (prov === "openai") ? "block" : "none";
-    } else if (prov === "ollama" || prov === "lm_studio") {
+      if (llmUrlRow) llmUrlRow.style.display = "block";
+    } else if (prov === "ollama" || prov === "lm_studio" || prov === "custom") {
       if (llmKeyRow) llmKeyRow.style.display = "none";
       if (llmUrlRow) llmUrlRow.style.display = "block";
     } else {
@@ -530,18 +586,61 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  if (llmProviderSelect) {
-    llmProviderSelect.addEventListener("change", () => {
-      updateLlmFieldVisibility();
-      const prov = llmProviderSelect.value;
-      if (prov === "ollama") {
-        if (llmBaseUrlInput) llmBaseUrlInput.value = "http://127.0.0.1:11434";
-        if (llmModelInput) llmModelInput.value = "llama3";
-      } else if (prov === "lm_studio") {
-        if (llmBaseUrlInput) llmBaseUrlInput.value = "http://127.0.0.1:1234/v1";
-        if (llmModelInput) llmModelInput.value = "local-model";
-      } else if (prov === "nvidia") {
-        if (llmModelInput) llmModelInput.value = "meta/llama-3.1-70b-instruct";
+  // Provider selector change
+  function handleProviderChange(newProv) {
+    if (llmProviderSelect) llmProviderSelect.value = newProv;
+    if (settingsProviderSelect) settingsProviderSelect.value = newProv;
+    updateLlmFieldVisibility();
+
+    const providerDefaults = {
+      grok: { url: "https://api.x.ai/v1", model: "grok-beta" },
+      nvidia: { url: "https://integrate.api.nvidia.com/v1", model: "meta/llama-3.1-70b-instruct" },
+      openai: { url: "https://api.openai.com/v1", model: "gpt-4o-mini" },
+      ollama: { url: "http://127.0.0.1:11434", model: "llama3" },
+      lm_studio: { url: "http://127.0.0.1:1234/v1", model: "local-model" },
+      custom: { url: "http://127.0.0.1:8080/v1", model: "custom-model" },
+      offline: { url: "", model: "offline-theorist" }
+    };
+
+    const d = providerDefaults[newProv];
+    if (d) {
+      if (llmBaseUrlInput) llmBaseUrlInput.value = d.url;
+      if (settingsUrlInput) settingsUrlInput.value = d.url;
+      if (llmModelInput && (!llmModelInput.value || llmModelInput.value === "offline-theorist")) llmModelInput.value = d.model;
+      if (settingsModelInput && (!settingsModelInput.value || settingsModelInput.value === "offline-theorist")) settingsModelInput.value = d.model;
+    }
+  }
+
+  llmProviderSelect?.addEventListener("change", (e) => handleProviderChange(e.target.value));
+  settingsProviderSelect?.addEventListener("change", (e) => handleProviderChange(e.target.value));
+
+  // Preset models dropdown
+  settingsPresetModels?.addEventListener("change", (e) => {
+    const val = e.target.value;
+    if (val) {
+      if (settingsModelInput) settingsModelInput.value = val;
+      if (llmModelInput) llmModelInput.value = val;
+    }
+  });
+
+  // Quick model paste buttons
+  document.querySelectorAll(".btn-quick-model").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const m = btn.dataset.m;
+      if (settingsModelInput) settingsModelInput.value = m;
+      if (llmModelInput) llmModelInput.value = m;
+    });
+  });
+
+  // Password mask toggle
+  if (btnToggleKeyMask && settingsApiKeyInput) {
+    btnToggleKeyMask.addEventListener("click", () => {
+      if (settingsApiKeyInput.type === "password") {
+        settingsApiKeyInput.type = "text";
+        btnToggleKeyMask.textContent = "Hide";
+      } else {
+        settingsApiKeyInput.type = "password";
+        btnToggleKeyMask.textContent = "Show";
       }
     });
   }
@@ -553,91 +652,234 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
+  // Tags in studio drawer
   document.getElementById("tag-llama")?.addEventListener("click", () => { if (llmModelInput) llmModelInput.value = "meta/llama-3.1-70b-instruct"; });
   document.getElementById("tag-nemotron")?.addEventListener("click", () => { if (llmModelInput) llmModelInput.value = "nvidia/nemotron-4-340b-instruct"; });
   document.getElementById("tag-deepseek")?.addEventListener("click", () => { if (llmModelInput) llmModelInput.value = "deepseek-ai/deepseek-coder-33b-instruct"; });
   document.getElementById("tag-glm")?.addEventListener("click", () => { if (llmModelInput) llmModelInput.value = "THUDM/glm-4-9b-chat"; });
 
-  async function saveLlmConfigSilently() {
-    const prov = llmProviderSelect ? llmProviderSelect.value : "offline";
+  async function gatherAndSaveLlmConfig() {
+    const prov = settingsProviderSelect ? settingsProviderSelect.value : (llmProviderSelect ? llmProviderSelect.value : "offline");
+    const model = (settingsModelInput && settingsModelInput.value) || (llmModelInput && llmModelInput.value) || "";
+    const key = (settingsApiKeyInput && settingsApiKeyInput.value) || (llmApiKeyInput && llmApiKeyInput.value) || "";
+    const url = (settingsUrlInput && settingsUrlInput.value) || (llmBaseUrlInput && llmBaseUrlInput.value) || "";
+
     const body = { provider: prov };
-    if (prov === "nvidia") {
-      if (llmApiKeyInput && llmApiKeyInput.value) body.nvidia_api_key = llmApiKeyInput.value;
-      if (llmModelInput && llmModelInput.value) body.nvidia_model = llmModelInput.value;
+    if (prov === "grok") {
+      if (key) body.grok_api_key = key;
+      if (model) body.grok_model = model;
+      if (url) body.grok_base_url = url;
+    } else if (prov === "nvidia") {
+      if (key) body.nvidia_api_key = key;
+      if (model) body.nvidia_model = model;
+      if (url) body.nvidia_base_url = url;
+    } else if (prov === "openai" || prov === "custom") {
+      if (key) body.openai_api_key = key;
+      if (model) body.openai_model = model;
+      if (url) body.openai_base_url = url;
     } else if (prov === "ollama") {
-      if (llmBaseUrlInput && llmBaseUrlInput.value) body.ollama_url = llmBaseUrlInput.value;
-      if (llmModelInput && llmModelInput.value) body.ollama_model = llmModelInput.value;
+      if (url) body.ollama_url = url;
+      if (model) body.ollama_model = model;
     } else if (prov === "lm_studio") {
-      if (llmBaseUrlInput && llmBaseUrlInput.value) body.lm_studio_url = llmBaseUrlInput.value;
-      if (llmModelInput && llmModelInput.value) body.lm_studio_model = llmModelInput.value;
-    } else if (prov === "openai") {
-      if (llmApiKeyInput && llmApiKeyInput.value) body.openai_api_key = llmApiKeyInput.value;
-      if (llmBaseUrlInput && llmBaseUrlInput.value) body.openai_base_url = llmBaseUrlInput.value;
-      if (llmModelInput && llmModelInput.value) body.openai_model = llmModelInput.value;
+      if (url) body.lm_studio_url = url;
+      if (model) body.lm_studio_model = model;
     }
-    await api("/api/intelligence/config", { method: "POST", body });
+
+    const res = await api("/api/intelligence/config", { method: "POST", body });
+    return res;
   }
 
-  if (btnTestLlm) {
-    btnTestLlm.addEventListener("click", async () => {
-      const prov = llmProviderSelect.value;
-      btnTestLlm.disabled = true;
-      btnTestLlm.textContent = "Testing...";
-      if (llmTestBadge) {
-        llmTestBadge.textContent = "Connecting...";
-        llmTestBadge.style.background = "#fff3e0";
-        llmTestBadge.style.color = "#e65100";
+  async function performTestConnection(targetBadge) {
+    const prov = settingsProviderSelect ? settingsProviderSelect.value : (llmProviderSelect ? llmProviderSelect.value : "offline");
+    if (targetBadge) {
+      targetBadge.textContent = "Connecting...";
+      targetBadge.style.background = "#fff3e0";
+      targetBadge.style.color = "#e65100";
+    }
+
+    await gatherAndSaveLlmConfig();
+
+    try {
+      const res = await api("/api/intelligence/test", {
+        method: "POST",
+        body: { provider: prov }
+      });
+      if (res.success) {
+        if (targetBadge) {
+          targetBadge.className = "api-badge connected";
+          targetBadge.innerHTML = `<span class="dot dot-run"></span> Connected &bull; 200 OK`;
+        }
+        alert(`Success: ${res.message || 'Connection verified for ' + prov}`);
+      } else {
+        if (targetBadge) {
+          targetBadge.className = "api-badge error";
+          targetBadge.innerHTML = `<span class="dot dot-stop"></span> Connection Failed`;
+        }
+        alert(res.error || "Connection failed. Please check endpoint or API key.");
+      }
+    } catch (err) {
+      if (targetBadge) {
+        targetBadge.className = "api-badge error";
+        targetBadge.innerHTML = `<span class="dot dot-stop"></span> Error`;
+      }
+      alert("Test connection error: " + err.message);
+    }
+  }
+
+  settingsBtnTest?.addEventListener("click", () => performTestConnection(settingsApiBadge));
+  btnTestLlm?.addEventListener("click", () => performTestConnection(llmTestBadge));
+
+  settingsBtnSave?.addEventListener("click", async () => {
+    settingsBtnSave.disabled = true;
+    try {
+      await gatherAndSaveLlmConfig();
+      await loadLlmConfig();
+      alert("API and model configuration saved successfully!");
+    } catch (e) {
+      alert("Failed to save config: " + e.message);
+    } finally {
+      settingsBtnSave.disabled = false;
+    }
+  });
+
+  btnSaveLlmCfg?.addEventListener("click", async () => {
+    btnSaveLlmCfg.disabled = true;
+    try {
+      await gatherAndSaveLlmConfig();
+      await loadLlmConfig();
+      alert("LLM Intelligence configuration saved!");
+    } catch (err) {
+      alert("Error saving config: " + err.message);
+    } finally {
+      btnSaveLlmCfg.disabled = false;
+    }
+  });
+
+  // ----------------------- AI Music Consultant & Dialogue Studio (view-lyrics) ---
+  window.insertConsultTag = (tag) => {
+    if (!consultLyricsEditor) return;
+    const start = consultLyricsEditor.selectionStart;
+    const end = consultLyricsEditor.selectionEnd;
+    const text = consultLyricsEditor.value;
+    consultLyricsEditor.value = text.substring(0, start) + `\n${tag}\n` + text.substring(end);
+    consultLyricsEditor.focus();
+  };
+
+  if (btnConsultAi) {
+    btnConsultAi.addEventListener("click", async () => {
+      const prompt = consultPromptInput.value.trim();
+      const genre = consultGenreInput.value.trim() || "Synthwave";
+      const notes = consultNotesInput.value.trim();
+
+      if (!prompt) {
+        alert("Please describe your music concept or vision first!");
+        consultPromptInput.focus();
+        return;
       }
 
-      await saveLlmConfigSilently();
+      btnConsultAi.disabled = true;
+      btnConsultAi.innerHTML = '<span class="dot dot-run"></span> Consulting with AI Producer...';
+      if (consultFeedbackBox) {
+        consultFeedbackBox.innerHTML = '<strong>Consulting AI...</strong> Analyzing your musical concept, chord progressions, tempo, and vocal structure...';
+      }
 
       try {
-        const res = await api("/api/intelligence/test", {
+        const res = await api("/api/intelligence/consult", {
           method: "POST",
-          body: { provider: prov }
+          body: {
+            prompt,
+            genre_hint: genre,
+            consultation_notes: notes
+          }
         });
-        if (res.success) {
-          if (llmTestBadge) {
-            llmTestBadge.textContent = "Connected & Ready";
-            llmTestBadge.style.background = "#e8f5e9";
-            llmTestBadge.style.color = "#2e7d32";
-          }
-        } else {
-          if (llmTestBadge) {
-            llmTestBadge.textContent = "Failed";
-            llmTestBadge.style.background = "#ffebee";
-            llmTestBadge.style.color = "#c62828";
-          }
-          alert(res.error || "Connection failed. Please check endpoint or API key.");
+
+        const c = res.consultation;
+        currentConsultation = c;
+
+        if (consultFeedbackBox) {
+          consultFeedbackBox.innerHTML = `
+            <strong>Producer Musical Guidance for "${escapeHtml(c.title || prompt)}":</strong><br>
+            &bull; <strong>Recommended Key & Tempo:</strong> ${c.key || 'C Major'} &bull; ${c.bpm || 120} BPM<br>
+            &bull; <strong>Harmonic Progression:</strong> ${(c.chord_progression || []).join(" - ") || 'Am - F - C - G'}<br>
+            &bull; <strong>Tone & Arrangement:</strong> ${escapeHtml(c.tone_and_mood || '')}<br><br>
+            <strong>Creative Producer Notes:</strong><br>
+            ${escapeHtml(c.producer_feedback || '')}
+          `;
         }
+
+        if (consultLyricsEditor && c.lyrics) {
+          consultLyricsEditor.value = c.lyrics;
+        }
+
+        if (consultProviderBadge) {
+          consultProviderBadge.textContent = c.provider_used || "AI Creative Director";
+          consultProviderBadge.style.background = "#e8f5e9";
+          consultProviderBadge.style.color = "#2e7d32";
+        }
+
       } catch (err) {
-        if (llmTestBadge) {
-          llmTestBadge.textContent = "Error";
-          llmTestBadge.style.background = "#ffebee";
-          llmTestBadge.style.color = "#c62828";
+        alert("Consultation failed: " + err.message);
+        if (consultFeedbackBox) {
+          consultFeedbackBox.innerHTML = `<strong>Error:</strong> ${escapeHtml(err.message)}`;
         }
-        alert("Test error: " + err.message);
       } finally {
-        btnTestLlm.disabled = false;
-        btnTestLlm.textContent = "Test Connection";
+        btnConsultAi.disabled = false;
+        btnConsultAi.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px; margin-right:6px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg> Talk with AI & Get Musical Feedback';
       }
     });
   }
 
-  if (btnSaveLlmCfg) {
-    btnSaveLlmCfg.addEventListener("click", async () => {
-      btnSaveLlmCfg.disabled = true;
-      try {
-        await saveLlmConfigSilently();
-        alert("LLM Intelligence configuration saved!");
-      } catch (err) {
-        alert("Error saving config: " + err.message);
-      } finally {
-        btnSaveLlmCfg.disabled = false;
+  // Feed lyrics and blueprint directly to local hardware model in Studio
+  if (btnFeedToHardware) {
+    btnFeedToHardware.addEventListener("click", () => {
+      const lyrics = consultLyricsEditor ? consultLyricsEditor.value.trim() : "";
+      if (!lyrics) {
+        alert("Please generate or enter lyrics before feeding to the local model!");
+        return;
       }
+
+      const prompt = consultPromptInput.value.trim();
+      const genre = consultGenreInput.value.trim() || "Synthwave";
+      const title = currentConsultation?.title || prompt.substring(0, 32);
+      const bpm = currentConsultation?.bpm || 120;
+      const key = currentConsultation?.key || "C Major";
+
+      // Transfer into Studio form inputs
+      const titleInput = document.getElementById("title-input");
+      const promptInput = document.getElementById("prompt-input");
+      const lyricsInput = document.getElementById("lyrics-input");
+      const bpmInput = document.getElementById("param-bpm");
+      const keySelect = document.getElementById("param-key");
+
+      if (titleInput) titleInput.value = title;
+      if (promptInput) promptInput.value = prompt;
+      if (lyricsInput) lyricsInput.value = lyrics;
+      if (bpmInput) bpmInput.value = bpm;
+      if (keySelect) keySelect.value = key;
+
+      // Switch Studio to Custom Lyrics Mode
+      const btnModeCustom = document.getElementById("mode-custom");
+      btnModeCustom?.click();
+
+      // Switch View to Studio
+      const studioNavBtn = document.querySelector('.nav-btn[data-view="studio"]');
+      studioNavBtn?.click();
+
+      // Show blueprint card in Studio
+      if (blueprintCard && currentConsultation) {
+        blueprintCard.classList.add("active");
+        document.getElementById("blueprint-title").textContent = `${title} Blueprint`;
+        document.getElementById("bp-chords").textContent = `Chords: ${(currentConsultation.chord_progression || []).join(' - ') || 'Am - F - C - G'}`;
+        document.getElementById("bp-tempo").textContent = `Tempo: ${bpm} BPM`;
+        document.getElementById("bp-key").textContent = `Key: ${key}`;
+        document.getElementById("bp-tone").textContent = `Tone: ${currentConsultation.tone_and_mood || 'Melodic & Dynamic'}`;
+      }
+
+      alert("Lyrics and blueprint successfully fed to the Local Studio! Click 'Create Music' to synthesize with your local hardware.");
     });
   }
 
+  // Auto-compose in studio
   if (btnLlmCompose) {
     btnLlmCompose.addEventListener("click", async () => {
       const prompt = promptInput.value.trim() || currentGenre;
@@ -666,10 +908,10 @@ document.addEventListener("DOMContentLoaded", async () => {
           if (blueprintCard) {
             blueprintCard.classList.add("active");
             document.getElementById("blueprint-title").textContent = `${bp.title} Blueprint`;
-            document.getElementById("bp-chords").textContent = `Chords: ${bp.chord_progression || 'Am - F - C - G'}`;
+            document.getElementById("bp-chords").textContent = `Chords: ${(bp.chord_progression || []).join(' - ') || 'Am - F - C - G'}`;
             document.getElementById("bp-tempo").textContent = `Tempo: ${bp.bpm || 120} BPM`;
             document.getElementById("bp-key").textContent = `Key: ${bp.key || 'C Major'}`;
-            document.getElementById("bp-tone").textContent = `Tone: ${bp.tone || 'Dynamic & Melodic'}`;
+            document.getElementById("bp-tone").textContent = `Tone: ${bp.tone_and_mood || bp.tone || 'Dynamic & Melodic'}`;
           }
         }
       } catch (err) {
@@ -682,6 +924,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   loadLlmConfig();
+
 
   // -------------------------------- Direct Hugging Face Download & Model Manager ---
   const hfRepoInput = document.getElementById("hf-repo-input");
